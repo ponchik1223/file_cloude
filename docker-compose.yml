@@ -1,0 +1,40 @@
+version: '3.5'
+
+services:
+  db:
+    image: postgres:15.3-alpine
+    container_name: db_app
+    ports: 
+    - 5432:5432
+    env_file:
+      - .env-non-dev
+    
+  
+  app:
+    build:
+      context: .
+    env_file:
+      - .env-non-dev
+    container_name: fastapi_app
+    ports:
+      - 9999:8000
+    depends_on:
+      - db
+    volumes:
+      - data:/data
+
+volumes:
+  data: 
+
+
+# version: '3.5'
+
+# services:
+#   db:
+#     container_name: db
+#     ports:
+#       - "5433:5432"
+#     environment:
+#       - POSTGRES_PASSWORD=root
+#       - POSTGRES_USER=admin
+#     image: postgres:15.3-alpine
