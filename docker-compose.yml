@@ -4,11 +4,19 @@ services:
   db:
     image: postgres:15.3-alpine
     container_name: db_app
-    ports: 
-    - 5432:5432
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    ports:
+      - 5432:5432
     env_file:
       - .env-non-dev
+    networks:
+      - app-network
     
+
   
   app:
     build:
@@ -16,25 +24,19 @@ services:
     env_file:
       - .env-non-dev
     container_name: fastapi_app
+    restart: on-failure
     ports:
       - 9999:8000
-    depends_on:
-      - db
     volumes:
       - data:/data
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
+
+networks:
+  app-network:
 
 volumes:
   data: 
-
-
-# version: '3.5'
-
-# services:
-#   db:
-#     container_name: db
-#     ports:
-#       - "5433:5432"
-#     environment:
-#       - POSTGRES_PASSWORD=root
-#       - POSTGRES_USER=admin
-#     image: postgres:15.3-alpine
